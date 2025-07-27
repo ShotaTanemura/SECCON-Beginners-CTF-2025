@@ -35,6 +35,8 @@ def got_reply(pkt):
                 if ping_process and ping_process.poll() is None:
                     ping_process.terminate()
                     print('[*] Ping process terminated.')
+                global finished
+                finished = True
         except ValueError:
             pass
 
