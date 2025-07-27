@@ -1,0 +1,18 @@
+[project]
+name = "memorag"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "ShotaTanemura",email = "shota0711tane@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flask-unsign (>=1.2.1,<2.0.0)",
+    "flask-unsign-wordlist (>=2024.1,<2025.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
