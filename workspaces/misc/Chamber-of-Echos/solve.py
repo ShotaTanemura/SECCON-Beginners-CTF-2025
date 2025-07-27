@@ -12,6 +12,7 @@ cipher = AES.new(bytes.fromhex(KEY_HEX.decode()), AES.MODE_ECB)
 blocks = {}
 needed = None
 finished = False
+ping_process = None
 
 def got_reply(pkt):
     if ICMP in pkt and pkt[ICMP].type == 0 and Raw in pkt:
@@ -23,13 +24,17 @@ def got_reply(pkt):
             blocks[idx] = frag
             print(f'Got block {idx}: {frag}')
 
-            global needed
+            global needed, finished, ping_process
             if needed is None and len(frag) < 14:
                 needed = idx + 1
 
             if needed and len(blocks) == needed:
                 flag = b''.join(blocks[i] for i in sorted(blocks))
                 print('\nFLAG:', flag.decode())
+                finished = True
+                if ping_process and ping_process.poll() is None:
+                    ping_process.terminate()
+                    print('[*] Ping process terminated.')
                 global finished
                 finished = True
         except ValueError:
@@ -38,7 +43,12 @@ def got_reply(pkt):
 def stopper(pkt):
     return finished
 
-threading.Thread(target=lambda: subprocess.run(['ping', TARGET]), daemon=True).start()
+def start_ping():
+    global ping_process
+    ping_process = subprocess.Popen(['ping', '-i', '0.2', TARGET])
+    ping_process.wait()
+
+threading.Thread(target=start_ping, daemon=True).start()
 
 print('[*] Sniffing … press Ctrl-C once the flag prints.')
 sniff(filter=f'icmp and src host {TARGET}', prn=got_reply, stop_filter=stopper)
